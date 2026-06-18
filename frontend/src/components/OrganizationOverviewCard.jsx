@@ -18,6 +18,7 @@ export function OrganizationOverviewCard({
   joiningOrganizationId = null,
   switchingCurrentOrganizationId = null,
   canQuitOrganization = true,
+  quitRestrictionReason = "",
 }) {
   const mockOrganizations = [
     {
@@ -117,7 +118,7 @@ export function OrganizationOverviewCard({
   const quitTooltip = !normalizedSelectedId
     ? "Select an organization first."
     : !canQuitOrganization
-      ? "You need to stay linked to at least one organization before quitting this one."
+      ? quitRestrictionReason || "You cannot quit this organization right now."
       : "Quit this organization.";
 
   return (

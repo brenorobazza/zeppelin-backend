@@ -19,6 +19,7 @@ export function SettingsPage({
   onOrganizationJoined,
   currentOrganizationId,
   onCurrentOrganizationChanged,
+  canQuitOrganization: canQuitOrganizationProp,
 }) {
   const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -32,7 +33,15 @@ export function SettingsPage({
     organizationId ? String(organizationId) : ""
   );
   const [isSavingProfile, setIsSavingProfile] = useState(false);
-  const canQuitOrganization = organizationOptions.length > 1;
+  const canQuitBecauseOfMembership = organizationOptions.length > 1;
+  const canQuitBecauseOfQuestionnaires =
+    typeof canQuitOrganizationProp === "boolean" ? canQuitOrganizationProp : true;
+  const canQuitOrganization = canQuitBecauseOfMembership && canQuitBecauseOfQuestionnaires;
+  const quitRestrictionReason = !canQuitBecauseOfMembership
+    ? "You need to stay linked to at least one organization before quitting this one."
+    : !canQuitBecauseOfQuestionnaires
+      ? "You can't leave this organization due to submitted linked questionnaires."
+      : "";
   const [profileForm, setProfileForm] = useState({
     firstName: "",
     lastName: "",
@@ -344,6 +353,7 @@ export function SettingsPage({
         joiningOrganizationId={joiningOrganizationId}
         switchingCurrentOrganizationId={switchingCurrentOrganizationId}
         canQuitOrganization={canQuitOrganization}
+        quitRestrictionReason={quitRestrictionReason}
       />
 
       <section className="panel">
