@@ -173,6 +173,34 @@ export default function App() {
     };
   }, [isPlatformScreen, user, analyticsFilters.organizationId, analyticsFilters.questionnaireId, analyticsFilters.stageScope, refreshKey]);
 
+  useEffect(() => {
+    if (!user || !isPlatformScreen) return;
+    if (analytics.loading || analytics.usingMockData) return;
+
+    const currentCycleId = String(analyticsFilters.questionnaireId || "");
+    const hasCompleteOptions = completeCycleOptions.length > 0;
+    const isCurrentCycleComplete = completeCycleOptions.some(
+      (cycle) => String(cycle.id) === currentCycleId
+    );
+
+    const nextCycleId = hasCompleteOptions
+      ? isCurrentCycleComplete
+        ? currentCycleId
+        : String(completeCycleOptions[completeCycleOptions.length - 1].id)
+      : "";
+
+    if (nextCycleId !== currentCycleId) {
+      updateAnalyticsFilters({ questionnaireId: nextCycleId });
+    }
+  }, [
+    user,
+    isPlatformScreen,
+    analytics.loading,
+    analytics.usingMockData,
+    analyticsFilters.questionnaireId,
+    completeCycleOptions,
+  ]);
+
   function goToLogin() {
     window.location.hash = "login";
     setScreen("login");
