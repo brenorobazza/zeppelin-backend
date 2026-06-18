@@ -77,6 +77,13 @@ export default function App() {
   });
   const lastScreenRef = useRef(screen);
 
+  const allCycleOptions = analytics.meta?.cycleOptions || [];
+  const completeCycleOptions = allCycleOptions.filter((cycle) => cycle.complete);
+  const selectedCompleteCycleId =
+    completeCycleOptions.some((cycle) => cycle.id === analyticsFilters.questionnaireId)
+      ? analyticsFilters.questionnaireId
+      : completeCycleOptions[completeCycleOptions.length - 1]?.id || "";
+
   function triggerRefresh() {
     setRefreshKey(k => k + 1);
   }
@@ -639,8 +646,8 @@ export default function App() {
         organizationOptions={user.organizations || []}
         selectedOrganizationId={user?.currentOrganizationId || analyticsFilters.organizationId}
         onOrganizationChange={(value) => syncCurrentOrganization(value, { persistCurrentOrganization: true })}
-        cycleOptions={analytics.meta.cycleOptions}
-        selectedCycleId={analyticsFilters.questionnaireId}
+        cycleOptions={completeCycleOptions}
+        selectedCycleId={selectedCompleteCycleId}
         onCycleChange={(value) => updateAnalyticsFilters({ questionnaireId: value })}
         usingMockData={analytics.usingMockData}
         analyticsError={analytics.error}

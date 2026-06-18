@@ -654,7 +654,8 @@ function normalizeMeta(dashboardPayload, historyPayload) {
         id: String(item.id),
         label: item.label,
         shortLabel: `Cycle ${index + 1}`,
-        answeredPractices: item.answered_practices || 0
+        answeredPractices: item.answered_practices || 0,
+        complete: Boolean(item.complete)
       }))
   };
 }
