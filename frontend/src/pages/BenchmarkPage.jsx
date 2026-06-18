@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BenchmarkFilters } from "../components/BenchmarkFilters";
 import { BenchmarkComparisonCard } from "../components/BenchmarkComparisonCard";
 import "./benchmark-page.css";
@@ -20,6 +20,13 @@ export function BenchmarkPage({ filters = {} }) {
     ...baseFilters
   });
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setAppliedFilters((current) => ({
+      ...baseFilters,
+      organizationId: filters.organizationId || current.organizationId || ""
+    }));
+  }, [filters.organizationId]);
 
   function handleFiltersApply(nextFilters) {
     setLoading(true);

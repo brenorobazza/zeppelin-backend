@@ -9,7 +9,7 @@ const DEFAULT_FILTERS = {
 };
 
 const CATEGORY_OPTIONS = [
-  { value: "", label: "Any category" },
+  { value: "", label: "Any section" },
   { value: "Finance", label: "Finance" },
   { value: "Healthcare", label: "Healthcare" },
   { value: "Retail", label: "Retail" },
@@ -138,7 +138,7 @@ export function BenchmarkFilters({
         <div className="benchmark-filters__grid">
           <FilterSelect
             id="benchmark-category-select"
-            label="Category"
+            label="Section"
             value={draft.category}
             onChange={(event) => updateField("category", event.target.value)}
             options={selectOptionsForField("category")}
