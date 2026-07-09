@@ -77,16 +77,12 @@ function PercentageScale({
 }
 
 const RESULTS_STAGE_SCALE = [
-  { value: 0, label: "Not adopted" },
-  { value: 10, label: "Abandoned" },
-  { value: 30, label: "Project/Product" },
-  { value: 60, label: "Process" },
-  { value: 100, label: "Institutionalized" }
+  { value: 0 },
+  { value: 10 },
+  { value: 30 },
+  { value: 60 },
+  { value: 100 }
 ];
-
-function renderStageScaleLabel(label) {
-  return label.replace("/", "/\u2009");
-}
 
 function getStageScaleLabelStyle(value) {
   if (value === 0) {
@@ -163,7 +159,6 @@ function StageMaturityScale({ score, currentLevel, available }) {
             style={getStageScaleLabelStyle(item.value)}
           >
             <strong>{item.value}</strong>
-            <span>{renderStageScaleLabel(item.label)}</span>
           </div>
         ))}
       </div>
