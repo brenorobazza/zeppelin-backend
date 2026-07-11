@@ -85,8 +85,8 @@ function FilterSelect({ id, label, value, onChange, options, disabled = false })
 }
 
 /**
- * BenchmarkFilters: refined cohort filter panel for the benchmark page.
- * It keeps the current organization context hidden and filters the peer cohort by Organization fields.
+ * BenchmarkFilters: refined benchmark filter panel for the benchmark page.
+ * It keeps the current organization context hidden and filters the peer group by Organization fields.
  */
 export function BenchmarkFilters({
   filters = {},
@@ -113,9 +113,9 @@ export function BenchmarkFilters({
       <div className="benchmark-filters__hero">
         <div className="benchmark-filters__eyebrow">
           <Sparkles size={14} strokeWidth={2.2} />
-          <span>Benchmark cohort filters</span>
+          <span>Benchmark filters</span>
         </div>
-        <h2>Refine the peer cohort</h2>
+        <h2>Refine your peer group</h2>
         <p>
           The comparison is calculated as an AND combination of the selected organization criteria.
           Leave a field empty to keep it broad.
@@ -126,9 +126,8 @@ export function BenchmarkFilters({
         <div className="benchmark-filters__panel-head">
           <div>
             <p className="benchmark-filters__panel-kicker">
-              <Filter size={14} strokeWidth={2.2} /> Cohort filters
+              <Filter size={14} strokeWidth={2.2} /> Benchmark filters
             </p>
-            <h3>Organization profile</h3>
           </div>
           <button type="button" className="benchmark-filters__ghost-btn" onClick={handleReset} disabled={loading}>
             Reset
@@ -172,7 +171,7 @@ export function BenchmarkFilters({
 
         <div className="benchmark-filters__actions">
           <p className="benchmark-filters__hint">
-            Filters are applied as a cohort intersection across the selected organization profile.
+            Filters are applied as a peer group intersection across the selected organization profile.
           </p>
           <button type="button" className="benchmark-filters__apply-btn" onClick={() => onApplyFilters(draft)} disabled={loading}>
             {loading ? "Applying..." : "Apply filters"}

@@ -6,7 +6,6 @@ export function BenchmarkStatePanel({
   title,
   message,
   badge,
-  details,
   actionLabel,
   onAction,
   icon = null
@@ -23,8 +22,6 @@ export function BenchmarkStatePanel({
 
       <h3>{title}</h3>
       <p>{message}</p>
-
-      {details ? <small className="benchmark-state__details">{details}</small> : null}
 
       {actionLabel && typeof onAction === "function" ? (
         <button type="button" className="benchmark-state__action" onClick={onAction}>

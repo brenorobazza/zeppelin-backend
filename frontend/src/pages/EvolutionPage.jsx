@@ -3,7 +3,7 @@ import { BenchmarkStatePanel } from "../components/BenchmarkStatePanel";
 import { Lock } from "lucide-react";
 import { fallbackHistoryData } from "../mock/analyticsFallback";
 
-const HISTORY_STAGE_METRICS = [
+const EVOLUTION_STAGE_METRICS = [
   {
     key: "agile",
     title: "Agile R&D evolution",
@@ -36,8 +36,7 @@ function formatScore(value) {
   return value == null ? "-" : value;
 }
 
-export function HistoryPage({ data, loading, filters }) {
-  // O historico compara ciclos para mostrar progressao real de maturidade ao longo do tempo.
+export function EvolutionPage({ data, loading, filters }) {
   const view = data || fallbackHistoryData;
   const historySeries = view.historySeries || [];
   const completeHistorySeries = historySeries.filter((item) => item.complete);
@@ -47,13 +46,13 @@ export function HistoryPage({ data, loading, filters }) {
   const displayHistorySeries = completeHistorySeries;
 
   if (loading && !data) {
-    return <section className="panel">Loading history...</section>;
+    return <section className="panel">Loading evolution...</section>;
   }
 
   if (view.selectedCycleEmpty) {
     return (
       <section className="panel">
-        <p className="eyebrow">History</p>
+        <p className="eyebrow">Evolution</p>
         <h3>No submitted answers for this cycle</h3>
         <p>No answers submitted yet.</p>
       </section>
@@ -63,9 +62,9 @@ export function HistoryPage({ data, loading, filters }) {
   if (!hasHistory) {
     return (
       <section className="panel">
-        <p className="eyebrow">History</p>
-        <h3>No historical data available</h3>
-        <p>No historical data.</p>
+        <p className="eyebrow">Evolution</p>
+        <h3>No evolution data available</h3>
+        <p>No evolution data.</p>
       </section>
     );
   }
@@ -73,8 +72,8 @@ export function HistoryPage({ data, loading, filters }) {
   if (!hasCompleteHistory) {
     return (
       <section className="panel">
-        <p className="eyebrow">History</p>
-        <h3>No complete historical cycles available</h3>
+        <p className="eyebrow">Evolution</p>
+        <h3>No complete cycles available</h3>
         <p>No complete cycles yet.</p>
       </section>
     );
@@ -95,7 +94,6 @@ export function HistoryPage({ data, loading, filters }) {
         />
       )}
 
-      {/* Cards comparativos por ciclo. */}
       <section className="panel">
         <div className="section-head">
           <div>
@@ -123,7 +121,7 @@ export function HistoryPage({ data, loading, filters }) {
               </div>
 
               <ul className="trend-list">
-                {HISTORY_STAGE_METRICS.map((stage) => (
+                {EVOLUTION_STAGE_METRICS.map((stage) => (
                   <li key={`${item.cycle}-${stage.key}`}>
                     <span>{stage.label}</span>
                     <strong>{formatScore(getCycleStageScore(item, stage.key))}</strong>
@@ -135,7 +133,6 @@ export function HistoryPage({ data, loading, filters }) {
         </div>
       </section>
 
-      {/* Tabela que explicita a migracao das praticas entre niveis de adocao. */}
       <section className="panel">
         <div className="section-head">
           <div>

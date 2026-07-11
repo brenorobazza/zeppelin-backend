@@ -4,7 +4,7 @@ import { CreateAccountPage } from "./pages/CreateAccountPage";
 import { AssessmentPage } from "./pages/AssessmentPage";
 import { BenchmarkPage } from "./pages/BenchmarkPage";
 import { DashboardPage } from "./pages/DashboardPage";
-import { HistoryPage } from "./pages/HistoryPage";
+import { EvolutionPage } from "./pages/EvolutionPage";
 import { LoginPage } from "./pages/LoginPage";
 import { RecommendationsPage } from "./pages/RecommendationsPage";
 import { ResultsPage } from "./pages/ResultsPage";
@@ -35,7 +35,7 @@ function getScreenFromHash() {
   if (hash === "assessment") return "assessment";
   if (hash === "results") return "results";
   if (hash === "recommendations") return "recommendations";
-  if (hash === "history") return "history";
+  if (hash === "history" || hash === "evolution") return "evolution";
   if (hash === "benchmark") return "benchmark";
   if (hash === "settings") return "settings";
   return "login";
@@ -137,7 +137,7 @@ export default function App() {
     "assessment",
     "results",
     "recommendations",
-    "history",
+    "evolution",
     "benchmark",
     "settings",
   ].includes(screen);
@@ -640,11 +640,11 @@ export default function App() {
         />
       ),
     },
-    history: {
+    evolution: {
       title: "Evolution by Cycle",
       subtitle: "",
       component: (
-        <HistoryPage
+        <EvolutionPage
           data={analytics.history}
           loading={analytics.loading}
           filters={analyticsFilters}
@@ -652,8 +652,8 @@ export default function App() {
       ),
     },
     benchmark: {
-      title: "Benchmark Comparison",
-      subtitle: "Compare your organization's maturity against peer cohorts.",
+      title: "Benchmark",
+      subtitle: "Compare your organization's maturity against your peers.",
       component: (
         <BenchmarkPage
           filters={analyticsFilters}

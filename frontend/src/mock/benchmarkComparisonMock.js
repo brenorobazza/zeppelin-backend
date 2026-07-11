@@ -6,7 +6,7 @@
 
 const benchmarkProfiles = {
   all: {
-    referenceLabel: "Peer cohort average",
+    referenceLabel: "Peer average",
     referenceAnsweredPractices: 184,
     companyCount: 18,
     snapshotCount: 84,
@@ -46,7 +46,7 @@ const benchmarkProfiles = {
     }
   },
   CI: {
-    referenceLabel: "CI-focused peer cohort",
+    referenceLabel: "CI-focused peers",
     referenceAnsweredPractices: 122,
     companyCount: 13,
     snapshotCount: 47,
@@ -86,7 +86,7 @@ const benchmarkProfiles = {
     }
   },
   CD: {
-    referenceLabel: "Delivery-focused peer cohort",
+    referenceLabel: "Delivery-focused peers",
     referenceAnsweredPractices: 136,
     companyCount: 11,
     snapshotCount: 39,
@@ -136,7 +136,7 @@ function buildFilterSummary(filters = {}) {
   ].filter(([, value]) => Boolean(value));
 
   if (!entries.length) {
-    return "No cohort filters selected";
+    return "No benchmark filters selected";
   }
 
   return entries.map(([label, value]) => `${label}: ${value}`).join(" · ");
@@ -147,7 +147,7 @@ function buildSelection(filters = {}) {
   const profile = benchmarkProfiles[profileKey];
 
   return {
-    reference_mode: "cohort-aggregate",
+    reference_mode: "peer-aggregate",
     reference_context: {
       label: `${profile.referenceLabel} · ${buildFilterSummary(filters)}`,
       company_count: profile.companyCount,
@@ -161,7 +161,7 @@ function buildSelection(filters = {}) {
       answered_practices: 42
     },
     reference_cycle: {
-      id: `cohort-${profileKey}`,
+      id: `peer-group-${profileKey}`,
       label: profile.referenceLabel,
       applied_date: null,
       answered_practices: profile.referenceAnsweredPractices
@@ -202,8 +202,8 @@ function buildBenchmarkState(filters = {}) {
     return {
       code: "insufficient_data",
       title: "Insufficient data for comparison",
-      message: "The selected cohort has only 3 companies. Benchmark requires at least 5 companies.",
-      error_code: "BENCHMARK_LOW_COHORT",
+      message: "The selected peer group has only 3 companies. Benchmark requires at least 5 companies.",
+      error_code: "BENCHMARK_LOW_PEER_COUNT",
       min_company_threshold: minCompanyThreshold,
       company_count: 3,
       snapshot_count: 9
@@ -226,7 +226,7 @@ function buildBenchmarkState(filters = {}) {
     return {
       code: "error",
       title: "Unable to load benchmark data",
-      message: "A server-side issue occurred while building the cohort.",
+      message: "A server-side issue occurred while building the peer group.",
       error_code: "ERR_DATA_FETCH_FAILED_500",
       min_company_threshold: minCompanyThreshold,
       company_count: 0,
@@ -237,7 +237,7 @@ function buildBenchmarkState(filters = {}) {
   return {
     code: "ready",
     title: "Benchmark ready",
-    message: "Benchmark cohort loaded successfully.",
+    message: "Benchmark loaded successfully with enough peer companies.",
     error_code: "",
     min_company_threshold: minCompanyThreshold,
     company_count: benchmarkProfiles.all.companyCount,
@@ -264,13 +264,13 @@ export function loadComparisonMock(filters = {}) {
       eye: {
         key: "eye",
         title: "Eye",
-        subtitle: `Peer benchmark against a cohort of organizations matched by the active filters. ${filterSummary}.`,
+        subtitle: `Compare against peer organizations matched by the active filters. ${filterSummary}.`,
         ...profile.lenses.eye
       },
       sth: {
         key: "sth",
         title: "StH",
-        subtitle: `Peer benchmark against a cohort of organizations matched by the active filters. ${filterSummary}.`,
+        subtitle: `Compare against peer organizations matched by the active filters. ${filterSummary}.`,
         ...profile.lenses.sth
       }
     }

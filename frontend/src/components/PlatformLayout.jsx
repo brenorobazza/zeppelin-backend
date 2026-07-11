@@ -60,8 +60,8 @@ const navItems = [
     ),
   },
   {
-    key: "history",
-    label: "History",
+    key: "evolution",
+    label: "Evolution",
     icon: (
       <NavIcon>
         <path d="M4 12a8 8 0 1 0 2.3-5.7" />

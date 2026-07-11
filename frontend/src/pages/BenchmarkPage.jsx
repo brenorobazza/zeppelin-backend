@@ -4,8 +4,8 @@ import { BenchmarkComparisonCard } from "../components/BenchmarkComparisonCard";
 import "./benchmark-page.css";
 
 /**
- * BenchmarkPage: Displays benchmark comparison against cohorts.
- * Uses the backend benchmark endpoint for cohort comparisons.
+ * BenchmarkPage: Displays benchmark comparison against peer groups.
+ * Uses the backend benchmark endpoint for peer group comparisons.
  */
 export function BenchmarkPage({ filters = {} }) {
   const baseFilters = {

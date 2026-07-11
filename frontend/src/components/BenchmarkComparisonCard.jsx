@@ -15,7 +15,7 @@ import "./benchmark-comparison-card.css";
 const LENS_OPTIONS = [
   {
     key: "eye",
-    label: "Eye",
+    label: "Eye of CSE",
     description: "7 dimensions"
   },
   {
@@ -109,7 +109,6 @@ function RadarPlot({
           <span>Comparison radar</span>
           <h4>{title}</h4>
         </div>
-        <small>{axes.length} dimensions</small>
       </div>
 
       <div className="benchmark-comparison-card__svg-wrap">
@@ -335,7 +334,7 @@ export function BenchmarkComparisonCard({
           type: filters.type,
           targetAudience: filters.targetAudience,
           referenceMode: isBenchmarkComparison
-            ? "cohort-aggregate"
+            ? "peer-aggregate"
             : useSpecificCycles
               ? "specific-cycles"
               : "first-submission",
@@ -419,7 +418,7 @@ export function BenchmarkComparisonCard({
   const currentCycleLabel = getCycleLabel(comparisonData, selectedCurrentCycleId) || comparisonData?.selection?.currentCycle?.label || "Current cycle";
   const referenceCycleLabel = getCycleLabel(comparisonData, selectedReferenceCycleId) || comparisonData?.selection?.referenceCycle?.label || "Reference cycle";
   const referenceContext = comparisonData?.selection?.referenceContext || null;
-  const benchmarkReferenceLabel = referenceContext?.label || referenceCycleLabel || "Cohort average";
+  const benchmarkReferenceLabel = referenceContext?.label || referenceCycleLabel || "Peer average";
   const benchmarkState = comparisonData?.benchmarkState || { code: "ready" };
   const benchmarkStateCode = String(benchmarkState.code || "ready").toLowerCase();
   const isInsufficientState = isBenchmarkComparison && benchmarkStateCode === "insufficient_data";
@@ -430,11 +429,8 @@ export function BenchmarkComparisonCard({
     (cycle) => String(cycle.id) !== String(selectedCurrentCycleId)
   );
 
-  // Delta value and class for score styling: negative -> red, zero -> neutral (black), positive -> green
-  const scoreDelta = comparisonData?.summary?.delta ?? 0;
-  const scoreDeltaClass = scoreDelta < 0 ? "is-negative" : scoreDelta > 0 ? "is-positive" : "is-neutral";
-  const currentScoreLabel = isBenchmarkComparison ? "Current score" : "General Score";
-  const referenceScoreLabel = isBenchmarkComparison ? "Cohort score" : "Reference score";
+  const currentScoreLabel = "Current score";
+  const referenceScoreLabel = isBenchmarkComparison ? "Peer average" : "Reference score";
 
   const activeLens = comparisonData?.lenses?.[lensKey] || comparisonData?.lenses?.eye;
   const selectedAxes = normalizeAxisValues(activeLens?.axes || []);
@@ -484,8 +480,7 @@ export function BenchmarkComparisonCard({
         badge="Insufficient Data"
         icon={<Lock size={24} strokeWidth={2.2} />}
         title={benchmarkState.title || "Insufficient data for comparison"}
-        message={benchmarkState.message || "The selected cohort does not meet the minimum company threshold."}
-        details={`Minimum cohort size: ${benchmarkState.minCompanyThreshold || 5} companies`}
+        message={benchmarkState.message || "Not enough peer companies for comparison."}
         actionLabel="Clear filters"
         onAction={onClearFilters}
       />
@@ -565,7 +560,6 @@ export function BenchmarkComparisonCard({
         </div>
 
         <div className="benchmark-comparison-card__group">
-          <span>{isBenchmarkComparison ? "Reference cohort" : "Cycles"}</span>
           <div className="benchmark-comparison-card__cycles-picker">
             {!isBenchmarkComparison ? (
               <div className="benchmark-comparison-card__cycle-group">
@@ -587,8 +581,7 @@ export function BenchmarkComparisonCard({
 
             {isBenchmarkComparison ? (
               <div className="benchmark-comparison-card__reference-summary">
-                <span>Reference cohort</span>
-                <strong>{benchmarkReferenceLabel}</strong>
+                <span>Peer group</span>
                 <small>
                   {referenceContext
                     ? `${referenceContext.company_count} companies · ${referenceContext.snapshot_count} snapshots`
@@ -626,7 +619,7 @@ export function BenchmarkComparisonCard({
             referenceValues={selectedAxes.map((axis) => axis.reference ?? 0)}
             currentLabel={currentCycleLabel}
             referenceLabel={isBenchmarkComparison ? benchmarkReferenceLabel : referenceCycleLabel}
-            legendReferenceLabel={isBenchmarkComparison ? "Cohort" : "Reference"}
+            legendReferenceLabel={isBenchmarkComparison ? "Peers" : "Reference"}
           />
         </div>
 
@@ -637,12 +630,6 @@ export function BenchmarkComparisonCard({
               {currentScoreLabel}
             </span>
             <strong>{comparisonData.summary.currentScore}/100</strong>
-            <small>
-              <span className={scoreDeltaClass}>
-                {scoreDelta >= 0 ? `+${scoreDelta}` : scoreDelta}
-                {" "}vs {isBenchmarkComparison ? benchmarkReferenceLabel : referenceCycleLabel}
-              </span>
-            </small>
           </article>
 
           <article className="benchmark-comparison-card__reference-score-card benchmark-comparison-card__score-card--soft">
@@ -651,7 +638,9 @@ export function BenchmarkComparisonCard({
               {referenceScoreLabel}
             </span>
             <strong>{comparisonData.summary.referenceScore}/100</strong>
-            <small>{isBenchmarkComparison ? benchmarkReferenceLabel : referenceCycleLabel}</small>
+            {!isBenchmarkComparison ? (
+              <small>{referenceCycleLabel}</small>
+            ) : null}
           </article>
 
           <LevelBars
@@ -662,11 +651,6 @@ export function BenchmarkComparisonCard({
           />
         </aside>
       </div>
-
-      <footer className="benchmark-comparison-card__footer">
-        <span>{currentCycleLabel} selected as current snapshot</span>
-        <span>{isBenchmarkComparison ? `${benchmarkReferenceLabel} aggregated from peer snapshots` : `${referenceCycleLabel} used as benchmark reference`}</span>
-      </footer>
     </section>
   );
 }

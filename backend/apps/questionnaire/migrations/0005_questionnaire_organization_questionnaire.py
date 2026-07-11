@@ -7,7 +7,10 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
     dependencies = [
         ("apps_organization", "0001_initial"),
-        ("apps_questionnaire", "0004_alter_questionnaire_document"),
+        (
+            "apps_questionnaire",
+            "0004_alter_adoptedlevel_table_alter_answer_table_and_more",
+        ),
     ]
 
     operations = [

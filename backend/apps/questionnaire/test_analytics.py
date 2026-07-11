@@ -424,7 +424,7 @@ class QuestionnaireAnalyticsServiceTests(SimpleTestCase):
             "apps.questionnaire.analytics.Organization.objects.all",
             return_value=organizations,
         ):
-            filtered = self.service._resolve_benchmark_cohort_organizations(request)
+            filtered = self.service._resolve_benchmark_peer_organizations(request)
 
         self.assertEqual([org.name for org in filtered], ["Small exact match"])
 

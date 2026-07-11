@@ -745,7 +745,7 @@ class QuestionnaireAnalyticsService:
         },
         "sth": {
             "title": "StH benchmark",
-            "subtitle": "Stairway to Heaven stages compared against the selected cohort reference.",
+            "subtitle": "Stairway to Heaven stages compared against the selected peer average.",
             "axes": [
                 {"key": "Agile", "label": "ARO"},
                 {"key": "CI", "label": "CI"},
@@ -1103,7 +1103,7 @@ class QuestionnaireAnalyticsService:
             },
         }
 
-    # Monta a resposta de benchmark baseada em um cohort de empresas.
+    # Monta a resposta de benchmark baseada em um grupo de peer organizations.
     def get_benchmark_payload(self, request):
         # Resolve current org context (keeps organization info consistent)
         context = self._resolve_context(request)
@@ -1197,7 +1197,7 @@ class QuestionnaireAnalyticsService:
             "organization": self._serialize_organization(context["organization"]),
             "scope": stage_scope,
             "selection": {
-                "reference_mode": "cohort-aggregate",
+                "reference_mode": "peer-aggregate",
                 "current_cycle": self._serialize_cycle(
                     current_questionnaire,
                     current_answers,
@@ -1215,7 +1215,7 @@ class QuestionnaireAnalyticsService:
             "lenses": {},
         }
 
-        cohort_orgs = list(self._resolve_benchmark_cohort_organizations(request))
+        peer_organizations = list(self._resolve_benchmark_peer_organizations(request))
         company_count = 0
         reference_overall_scores = []
         reference_dimension_snapshots = []
@@ -1223,7 +1223,7 @@ class QuestionnaireAnalyticsService:
         snapshot_ids = set()
         reference_answered_practices = 0
 
-        for org in cohort_orgs:
+        for org in peer_organizations:
             org_answers = list(self._base_answers_queryset(org.id, stage_scope))
             org_questionnaire, org_complete_answers = pick_latest_complete_cycle(
                 org_answers
@@ -1257,7 +1257,7 @@ class QuestionnaireAnalyticsService:
         base_payload["selection"]["reference_context"] = {
             "company_count": company_count,
             "snapshot_count": snapshot_count,
-            "label": "Comparison group",
+            "label": "Peer group",
             "filters": {
                 "organization_category": request.query_params.get(
                     "organization_category"
@@ -1286,7 +1286,7 @@ class QuestionnaireAnalyticsService:
         if company_count < self.BENCHMARK_MIN_COMPANY_THRESHOLD:
             base_payload["benchmark_state"] = {
                 "code": "insufficient_data",
-                "title": "Insufficient cohort",
+                "title": "Not enough peer companies",
                 "message": (
                     f"At least {self.BENCHMARK_MIN_COMPANY_THRESHOLD} companies are required to run the benchmark."
                 ),
@@ -1329,7 +1329,7 @@ class QuestionnaireAnalyticsService:
         base_payload["benchmark_state"] = {
             "code": "ready",
             "title": "Benchmark ready",
-            "message": "Benchmark cohort is sufficient and ready.",
+            "message": "Benchmark is ready with enough peer companies.",
             "min_company_threshold": self.BENCHMARK_MIN_COMPANY_THRESHOLD,
             "company_count": company_count,
             "snapshot_count": snapshot_count,
@@ -1431,7 +1431,7 @@ class QuestionnaireAnalyticsService:
             "reference_mode must be first-submission or specific-cycles"
         )
 
-    def _resolve_benchmark_cohort_organizations(self, request):
+    def _resolve_benchmark_peer_organizations(self, request):
         qs = Organization.objects.all()
         category = request.query_params.get("organization_category")
         size = request.query_params.get("organization_size")

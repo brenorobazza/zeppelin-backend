@@ -266,7 +266,7 @@ class QuestionnaireComparisonAnalyticsView(APIView):
         return Response(payload)
 
 
-# Endpoint agregado para benchmark de cohort externo.
+# Endpoint agregado para benchmark de peer group externo.
 class QuestionnaireBenchmarkAnalyticsView(APIView):
     authentication_classes = [OAuth2Authentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]

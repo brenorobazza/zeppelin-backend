@@ -93,7 +93,7 @@ class Command(BaseCommand):
         },
         {
             "name": "Benchmark Seed - Epsilon Shop",
-            "description": "B2B retail org used to diversify the cohort.",
+            "description": "B2B retail org used to diversify the peer group.",
             "organization_country": "Brazil",
             "organization_sector": "Commerce",
             "target_audience": "B2B",
@@ -108,7 +108,7 @@ class Command(BaseCommand):
         },
         {
             "name": "Benchmark Seed - Zeta Learn",
-            "description": "B2C education org that stays out of the B2B cohort.",
+            "description": "B2C education org that stays out of the B2B peer group.",
             "organization_country": "Brazil",
             "organization_sector": "Education",
             "target_audience": "B2C",
