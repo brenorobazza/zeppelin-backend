@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { PlatformLayout } from "./components/PlatformLayout";
 import { CreateAccountPage } from "./pages/CreateAccountPage";
 import { AssessmentPage } from "./pages/AssessmentPage";
@@ -22,7 +22,7 @@ import {
   getAnalyticsFiltersFromUrl,
   getFallbackAnalyticsBundle,
   loadAnalyticsBundle,
-  updateAnalyticsFiltersInUrl
+  updateAnalyticsFiltersInUrl,
 } from "./services/analytics";
 
 // Lê o hash da URL e traduz isso para a "tela atual" da aplicação.
@@ -56,7 +56,9 @@ export default function App() {
   });
 
   // Reúne os filtros que controlam a análise: empresa, ciclo e escopo.
-  const [analyticsFilters, setAnalyticsFilters] = useState(getAnalyticsFiltersFromUrl);
+  const [analyticsFilters, setAnalyticsFilters] = useState(
+    getAnalyticsFiltersFromUrl,
+  );
 
   // Centraliza todos os dados usados pelas telas principais.
   // Também informa se a tela está carregando, se está usando mock e se ocorreu erro.
@@ -64,28 +66,46 @@ export default function App() {
     ...getFallbackAnalyticsBundle(),
     loading: false,
     usingMockData: true,
-    error: ""
+    error: "",
   }));
 
   const [refreshKey, setRefreshKey] = useState(0);
   const [disableGlobalSelectors, setDisableGlobalSelectors] = useState(false);
   const [registrationUserData, setRegistrationUserData] = useState(null);
-  const [organizationRegistrationContext, setOrganizationRegistrationContext] = useState({
-    mode: "signup",
-    source: "join-organization",
-    employeeId: null,
-  });
+  const [organizationRegistrationContext, setOrganizationRegistrationContext] =
+    useState({
+      mode: "signup",
+      source: "join-organization",
+      employeeId: null,
+    });
   const lastScreenRef = useRef(screen);
 
   const allCycleOptions = analytics.meta?.cycleOptions || [];
-  const completeCycleOptions = allCycleOptions.filter((cycle) => cycle.complete);
-  const selectedCompleteCycleId =
-    completeCycleOptions.some((cycle) => cycle.id === analyticsFilters.questionnaireId)
-      ? analyticsFilters.questionnaireId
-      : completeCycleOptions[completeCycleOptions.length - 1]?.id || "";
+  const completeCycleOptions = allCycleOptions.filter(
+    (cycle) => cycle.complete,
+  );
+
+  const selectedCompleteCycleId = useMemo(() => {
+    // If current cycle is complete, use it
+    if (
+      completeCycleOptions.some(
+        (cycle) => cycle.id === analyticsFilters.questionnaireId,
+      )
+    ) {
+      return analyticsFilters.questionnaireId;
+    }
+
+    // If current cycle is incomplete but we have complete cycles, select the last complete
+    if (completeCycleOptions.length > 0) {
+      return completeCycleOptions[completeCycleOptions.length - 1].id;
+    }
+
+    // Otherwise use current cycle (even if incomplete/empty)
+    return analyticsFilters.questionnaireId || "";
+  }, [analyticsFilters.questionnaireId, completeCycleOptions]);
 
   function triggerRefresh() {
-    setRefreshKey(k => k + 1);
+    setRefreshKey((k) => k + 1);
   }
 
   useEffect(() => {
@@ -119,7 +139,7 @@ export default function App() {
     "recommendations",
     "history",
     "benchmark",
-    "settings"
+    "settings",
   ].includes(screen);
 
   useEffect(() => {
@@ -132,7 +152,7 @@ export default function App() {
       setAnalytics((current) => ({
         ...current,
         loading: true,
-        error: ""
+        error: "",
       }));
 
       try {
@@ -144,7 +164,7 @@ export default function App() {
           ...bundle,
           loading: false,
           usingMockData: false,
-          error: ""
+          error: "",
         });
       } catch (error) {
         if (ignore) return;
@@ -156,12 +176,14 @@ export default function App() {
           return;
         }
 
-        console.error("Failed to load analytics bundle:", error, { filters: analyticsFilters });
+        console.error("Failed to load analytics bundle:", error, {
+          filters: analyticsFilters,
+        });
         setAnalytics({
           ...getFallbackAnalyticsBundle(),
           loading: false,
           usingMockData: true,
-          error: error.message || "Failed to load analytics from backend."
+          error: error.message || "Failed to load analytics from backend.",
         });
       }
     }
@@ -171,34 +193,13 @@ export default function App() {
     return () => {
       ignore = true;
     };
-  }, [isPlatformScreen, user, analyticsFilters.organizationId, analyticsFilters.questionnaireId, analyticsFilters.stageScope, refreshKey]);
-
-  useEffect(() => {
-    if (!user || !isPlatformScreen) return;
-    if (analytics.loading || analytics.usingMockData) return;
-
-    const currentCycleId = String(analyticsFilters.questionnaireId || "");
-    const hasCompleteOptions = completeCycleOptions.length > 0;
-    const isCurrentCycleComplete = completeCycleOptions.some(
-      (cycle) => String(cycle.id) === currentCycleId
-    );
-
-    const nextCycleId = hasCompleteOptions
-      ? isCurrentCycleComplete
-        ? currentCycleId
-        : String(completeCycleOptions[completeCycleOptions.length - 1].id)
-      : "";
-
-    if (nextCycleId !== currentCycleId) {
-      updateAnalyticsFilters({ questionnaireId: nextCycleId });
-    }
   }, [
-    user,
     isPlatformScreen,
-    analytics.loading,
-    analytics.usingMockData,
+    user,
+    analyticsFilters.organizationId,
     analyticsFilters.questionnaireId,
-    completeCycleOptions,
+    analyticsFilters.stageScope,
+    refreshKey,
   ]);
 
   function goToLogin() {
@@ -257,7 +258,11 @@ export default function App() {
     });
   }
 
-  async function handleOrganizationRegistrationSubmit({ form, mode, accountData }) {
+  async function handleOrganizationRegistrationSubmit({
+    form,
+    mode,
+    accountData,
+  }) {
     const organizationPayload = mapOrganizationFormPayload(form);
 
     if (mode === "signup") {
@@ -274,7 +279,8 @@ export default function App() {
       });
 
       return {
-        message: "Registration completed successfully. Your account is now linked to an organization.",
+        message:
+          "Registration completed successfully. Your account is now linked to an organization.",
       };
     }
 
@@ -284,7 +290,7 @@ export default function App() {
       if (!current) return current;
 
       const alreadyExists = (current.organizations || []).some(
-        (item) => String(item.id) === String(payload.organization_id)
+        (item) => String(item.id) === String(payload.organization_id),
       );
 
       const nextOrganizations = alreadyExists
@@ -293,7 +299,8 @@ export default function App() {
             ...(current.organizations || []),
             {
               id: payload.organization_id,
-              name: payload.organization_name || form.name || "New Organization",
+              name:
+                payload.organization_name || form.name || "New Organization",
               organization_country:
                 payload.organization_country || form.country || "Brazil",
               organization_sector:
@@ -311,7 +318,8 @@ export default function App() {
     });
 
     return {
-      message: payload.message || "Organization created and linked to your profile.",
+      message:
+        payload.message || "Organization created and linked to your profile.",
     };
   }
 
@@ -323,7 +331,11 @@ export default function App() {
   function logout() {
     setUser(null);
     localStorage.removeItem("zeppelin_user");
-    const resetFilters = { organizationId: "", questionnaireId: "", stageScope: "all" };
+    const resetFilters = {
+      organizationId: "",
+      questionnaireId: "",
+      stageScope: "all",
+    };
     setAnalyticsFilters(resetFilters);
     updateAnalyticsFiltersInUrl(resetFilters);
     localStorage.removeItem("organization_id");
@@ -356,7 +368,10 @@ export default function App() {
     });
   }
 
-  function syncCurrentOrganization(nextOrganizationId, { persistCurrentOrganization = false } = {}) {
+  function syncCurrentOrganization(
+    nextOrganizationId,
+    { persistCurrentOrganization = false } = {},
+  ) {
     const nextId = String(nextOrganizationId || "");
     if (!nextId) {
       return;
@@ -398,7 +413,10 @@ export default function App() {
       return;
     }
 
-    if (String(analyticsFilters.organizationId || "") !== String(fallbackOrganizationId)) {
+    if (
+      String(analyticsFilters.organizationId || "") !==
+      String(fallbackOrganizationId)
+    ) {
       updateAnalyticsFilters({
         organizationId: fallbackOrganizationId,
         questionnaireId: analyticsFilters.questionnaireId || "",
@@ -419,11 +437,13 @@ export default function App() {
       if (!current) return current;
 
       const nextOrganizations = (current.organizations || []).filter(
-        (organization) => String(organization.id) !== removedId
+        (organization) => String(organization.id) !== removedId,
       );
       const nextCurrentOrganizationId =
         String(current.currentOrganizationId || "") === removedId
-          ? (nextOrganizations[0] ? String(nextOrganizations[0].id) : "")
+          ? nextOrganizations[0]
+            ? String(nextOrganizations[0].id)
+            : ""
           : String(current.currentOrganizationId || "");
 
       const nextUser = {
@@ -465,7 +485,7 @@ export default function App() {
       if (!current) return current;
 
       const alreadyLinked = (current.organizations || []).some(
-        (organization) => String(organization.id) === joinedId
+        (organization) => String(organization.id) === joinedId,
       );
       if (alreadyLinked) {
         return current;
@@ -477,7 +497,9 @@ export default function App() {
           ...(current.organizations || []),
           {
             id: payload.organization_id,
-            name: payload.organization_name || `Organization ${payload.organization_id}`,
+            name:
+              payload.organization_name ||
+              `Organization ${payload.organization_id}`,
             organization_country: payload.organization_country || "Brazil",
             organization_sector: payload.organization_sector || "",
           },
@@ -518,7 +540,10 @@ export default function App() {
       <JoinOrganizationPage
         accountData={registrationUserData}
         onCreateOrganization={() =>
-          goToOrganizationRegistration({ mode: "signup", source: "join-organization" })
+          goToOrganizationRegistration({
+            mode: "signup",
+            source: "join-organization",
+          })
         }
         onFinalizeJoin={handleFinalizeJoin}
         onBackToLogin={goToLogin}
@@ -560,7 +585,7 @@ export default function App() {
           data={analytics.dashboard}
           loading={analytics.loading}
         />
-      )
+      ),
     },
     assessment: {
       title: "Assessment Questionnaire",
@@ -572,8 +597,12 @@ export default function App() {
           organizations={user?.organizations || []}
           cycleOptions={analytics.meta?.cycleOptions || []}
           organizationName={analytics.meta?.organizationName}
-          onChangeOrganization={(id) => updateAnalyticsFilters({ organizationId: id, questionnaireId: "" })}
-          onCycleCreated={(id) => updateAnalyticsFilters({ questionnaireId: id })}
+          onChangeOrganization={(id) =>
+            updateAnalyticsFilters({ organizationId: id, questionnaireId: "" })
+          }
+          onCycleCreated={(id) =>
+            updateAnalyticsFilters({ questionnaireId: id })
+          }
           onViewResults={(qId) => {
             updateAnalyticsFilters({ questionnaireId: qId });
             goToScreen("results");
@@ -587,7 +616,7 @@ export default function App() {
           }}
           onFormStateChange={setDisableGlobalSelectors}
         />
-      )
+      ),
     },
     results: {
       title: "Diagnostic Detail",
@@ -598,7 +627,7 @@ export default function App() {
           overview={analytics.dashboard}
           loading={analytics.loading}
         />
-      )
+      ),
     },
     recommendations: {
       title: "Recommendations",
@@ -609,7 +638,7 @@ export default function App() {
           data={analytics.recommendations}
           loading={analytics.loading}
         />
-      )
+      ),
     },
     history: {
       title: "Evolution by Cycle",
@@ -620,7 +649,7 @@ export default function App() {
           loading={analytics.loading}
           filters={analyticsFilters}
         />
-      )
+      ),
     },
     benchmark: {
       title: "Benchmark Comparison",
@@ -630,22 +659,27 @@ export default function App() {
           filters={analyticsFilters}
           organizationOptions={user?.organizations || []}
         />
-      )
+      ),
     },
     settings: {
       title: "Organization Settings",
-      subtitle: "Review current members and apply removal permissions within the selected organization.",
+      subtitle:
+        "Review current members and apply removal permissions within the selected organization.",
       component: (
         <SettingsPage
           organizationId={analyticsFilters.organizationId}
           organizationOptions={user?.organizations || []}
-          currentOrganizationId={user?.currentOrganizationId || analyticsFilters.organizationId}
+          currentOrganizationId={
+            user?.currentOrganizationId || analyticsFilters.organizationId
+          }
           onProfileUpdated={updateUserProfile}
           onSelfRemoved={logout}
           onOrganizationQuit={handleOrganizationQuit}
           onOrganizationJoined={handleOrganizationJoined}
           onCurrentOrganizationChanged={handleCurrentOrganizationChanged}
-          canQuitOrganization={(analytics.history?.historySeries || []).length === 0}
+          canQuitOrganization={
+            (analytics.history?.historySeries || []).length === 0
+          }
           onCreateOrganization={() =>
             goToOrganizationRegistration({
               mode: "add-organization",
@@ -654,17 +688,18 @@ export default function App() {
             })
           }
         />
-      )
-    }
+      ),
+    },
   };
-
 
   if (user && pageMap[screen]) {
     const page = pageMap[screen];
-    const hideCycleSelector = screen === "assessment" || 
-      screen === "benchmark" || screen === "settings";
+    const hideCycleSelector =
+      screen === "assessment" ||
+      screen === "benchmark" ||
+      screen === "settings";
     return (
-        <PlatformLayout
+      <PlatformLayout
         activePage={screen}
         title={page.title}
         subtitle={page.subtitle}
@@ -673,16 +708,22 @@ export default function App() {
         onNavigate={goToScreen}
         onLogout={logout}
         organizationOptions={user.organizations || []}
-        selectedOrganizationId={user?.currentOrganizationId || analyticsFilters.organizationId}
-        onOrganizationChange={(value) => syncCurrentOrganization(value, { persistCurrentOrganization: true })}
+        selectedOrganizationId={
+          user?.currentOrganizationId || analyticsFilters.organizationId
+        }
+        onOrganizationChange={(value) =>
+          syncCurrentOrganization(value, { persistCurrentOrganization: true })
+        }
         cycleOptions={completeCycleOptions}
         selectedCycleId={selectedCompleteCycleId}
-        onCycleChange={(value) => updateAnalyticsFilters({ questionnaireId: value })}
+        onCycleChange={(value) =>
+          updateAnalyticsFilters({ questionnaireId: value })
+        }
         usingMockData={analytics.usingMockData}
         analyticsError={analytics.error}
         analyticsLoading={analytics.loading}
         disableGlobalSelectors={disableGlobalSelectors}
-        hideCycleSelector = {hideCycleSelector}
+        hideCycleSelector={hideCycleSelector}
       >
         {page.component}
       </PlatformLayout>
@@ -695,16 +736,17 @@ export default function App() {
       onCreateAccountClick={goToCreateAccount}
       onLoginSuccess={(loggedUser) => {
         // Inicializa o usuário com seu nome e lista de empresas vinculadas.
-        const newUser = { 
+        const newUser = {
           username: loggedUser?.username || "Alex Silva",
-          fullName: loggedUser?.full_name || loggedUser?.username || "Alex Silva",
+          fullName:
+            loggedUser?.full_name || loggedUser?.username || "Alex Silva",
           email: loggedUser?.email || "",
           employeeId: loggedUser?.employee_id || null,
           currentOrganizationId: loggedUser?.current_organization_id
             ? String(loggedUser.current_organization_id)
             : null,
           isAdmin: Boolean(loggedUser?.is_admin),
-          organizations: loggedUser?.organizations || []
+          organizations: loggedUser?.organizations || [],
         };
         setUser(newUser);
         localStorage.setItem("zeppelin_user", JSON.stringify(newUser));
